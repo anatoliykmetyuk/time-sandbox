@@ -19,7 +19,17 @@ case class Matrix(
 , matrixRowOffset: Int = 3
 , matrixColOffset: Int = 6
 , logRowOffset   : Int = 1
-, logColOffset   : Int = 0)
+, logColOffset   : Int = 0
+) {
+  def log(msg: String) = copy(log = msg :: log)
+  
+  def updateData(k: String, v: Any) = copy(data = data.updated(k, v))
+  def dataAs[A](k: String) = data(k).asInstanceOf[A]
+
+  def apply(row: Int, col: Int) = matrix(row)(col)
+  def update(row: Int, col: Int, char: Char) =
+    copy(matrix = matrix.updated(row, matrix(row).updated(col, char)))
+}
 
 object Matrix {
   implicit val show: Show[Matrix] = new Show[Matrix] {
@@ -39,7 +49,7 @@ object Matrix {
             a1.cursor(
               row + matrixRowOffset + dr
             , col + matrixColOffset + dc
-            ).a(char)
+            ).render(char.toString.toUpperCase)
           } }
 
       // Render the log
