@@ -9,15 +9,15 @@ trait ConsoleUtils {
   import sys.process._
 
   val consoleInstall = IO {
-    Seq("sh", "-c", "stty -icanon min 1 < /dev/tty").!
-    Seq("sh", "-c", "stty -echo < /dev/tty").!
-    Seq("tput", "civis").!
+    Seq("sh", "-c", "stty -icanon min 1 < /dev/tty").!  // Consume one character at a time
+    Seq("sh", "-c", "stty -echo < /dev/tty").!          // Do not display user input
+    Seq("tput", "civis").!                              // Make cursor invisible
 
     AnsiConsole.systemInstall()
   }
 
   val consoleUninstall = IO {
     AnsiConsole.systemUninstall()
-    Seq("tput", "cnorm").!
+    Seq("tput", "cnorm").!  // Make cursor visible
   }
 }
