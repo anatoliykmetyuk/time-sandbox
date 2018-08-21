@@ -38,7 +38,7 @@ object Matrix {
       
       // Render the layout
       val layout = ansi()
-        .eraseScreen()
+        .eraseScreen(Erase.BACKWARD)
         .box(row, col, height, widthScreen)
         .box(row, widthScreen + 5, height, widthLog)
 
@@ -59,7 +59,7 @@ object Matrix {
           a.cursor(row + logRowOffset + dr, col + widthScreen + 3 + logColOffset)
            .render(line) }
 
-      logRendered.cursor(100, 0)
+      logRendered
     }
   }
 }
