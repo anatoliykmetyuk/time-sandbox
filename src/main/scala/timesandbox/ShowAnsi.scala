@@ -9,7 +9,3 @@ import simulacrum._
   def show(a: A): Ansi
 }
 
-object ShowAnsi {
-  implicit def deriveShow[A: ShowAnsi]: Show[A] =
-    a => ShowAnsi[A].show(a).toString
-}

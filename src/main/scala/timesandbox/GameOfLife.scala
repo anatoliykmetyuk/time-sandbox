@@ -11,9 +11,11 @@ import org.fusesource.jansi.{ AnsiConsole, Ansi }, Ansi._
 import timesandbox.implicits._
 
 
-object Main extends IOApp with ConsoleUtils {
-  implicit val updatePeriod = 250 milliseconds
+object GameOfLife extends IOApp with ConsoleUtils {
+  implicit val updatePeriod = 100 milliseconds
 
+  val alive = 'x'
+  val dead  = '-'
   val model = Matrix(
     matrix = file"matrices/blinker.txt".contentAsString.split('\n').toList.map(_.toList)
   , data = Map(
@@ -37,9 +39,6 @@ object Main extends IOApp with ConsoleUtils {
       val sNext: Matrix = (if (!(paused && !step))
         (  0 until h).foldLeft(s ) { (s0, r) =>
           (0 until w).foldLeft(s0) { (s1, c) =>
-            val alive = 'x'
-            val dead  = 'o'
-
             val neighbours: Int = (for {
               dr <- -1 to 1
               dc <- -1 to 1

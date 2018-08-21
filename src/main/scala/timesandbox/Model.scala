@@ -32,8 +32,8 @@ case class Matrix(
 }
 
 object Matrix {
-  implicit val show: Show[Matrix] = new Show[Matrix] {
-    def show(l: Matrix): String = {
+  implicit val show: ShowAnsi[Matrix] = new ShowAnsi[Matrix] {
+    def show(l: Matrix): Ansi = {
       import l._
       
       // Render the layout
@@ -59,8 +59,7 @@ object Matrix {
           a.cursor(row + logRowOffset + dr, col + widthScreen + 3 + logColOffset)
            .render(line) }
 
-      // Convert Ansi to String
-      logRendered.cursor(100, 0).toString
+      logRendered.cursor(100, 0)
     }
   }
 }
