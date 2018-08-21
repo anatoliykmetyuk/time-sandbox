@@ -1,7 +1,8 @@
 val ScalaVer = "2.12.6"
 
-val CatsEffect    = "1.0.0-RC3"
-val Simulacrum    = "0.13.0"
+val CatsEffect  = "1.0.0-RC3"
+val Simulacrum  = "0.13.0"
+val BetterFiles = "3.6.0"
 
 val Paradise      = "2.1.0"
 val KindProjector = "0.9.7"
@@ -14,9 +15,10 @@ lazy val commonSettings = Seq(
 , scalaVersion := ScalaVer
 
 , libraryDependencies ++= Seq(
-    "org.typelevel"        %% "cats-effect" % CatsEffect
-  , "com.github.mpilquist" %% "simulacrum"  % Simulacrum
-  , "org.fusesource.jansi"  % "jansi"       % JAnsi
+    "org.typelevel"        %% "cats-effect"  % CatsEffect
+  , "com.github.mpilquist" %% "simulacrum"   % Simulacrum
+  , "com.github.pathikrit" %% "better-files" % BetterFiles
+  , "org.fusesource.jansi"  % "jansi"        % JAnsi
   )
 , addCompilerPlugin("org.scalamacros" % "paradise"       % Paradise cross CrossVersion.full)
 , addCompilerPlugin("org.spire-math" %% "kind-projector" % KindProjector)
