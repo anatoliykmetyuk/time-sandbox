@@ -1,55 +1,70 @@
 package timesandbox
 
+import scala.language.postfixOps
+
+import scala.concurrent.duration._
+
 import cats._, cats.implicits._, cats.data._, cats.effect._
-
-import org.fusesource.jansi.AnsiConsole
-import org.fusesource.jansi.Ansi, Ansi._
-import org.fusesource.jansi.Ansi.Color._
+import org.fusesource.jansi.{ AnsiConsole, Ansi }, Ansi._
+import timesandbox.implicits._
 
 
-object Main extends IOApp {
-  def run(args: List[String]): IO[ExitCode] = {
-    val consoleInstall = IO {
-      import sys.process._
-      (Seq("sh", "-c", "stty -icanon min 1 < /dev/tty") !)
-      (Seq("sh", "-c", "stty -echo < /dev/tty") !)
-      AnsiConsole.systemInstall()
+object Main extends IOApp with ConsoleUtils {
+  val model = Matrix(
+    matrix = 
+    """oooooooooo
+      |oooooooooo
+      |oooooooooo
+      |oooooooooo
+      |ooooxxxooo
+      |oooooooooo
+      |oooooooooo
+      |oooooooooo
+      |oooooooooo
+      |oooooooooo""".stripMargin
+      .split('\n').toList  // List[String]
+      .map(_.toList)       // List[List[Char]]
+
+  , data = Map("running" -> true, "iter" -> 0)
+  )
+
+  implicit val updatePeriod = 100 milliseconds
+
+  def run(args: List[String]): IO[ExitCode] = for {
+    _   <- consoleInstall
+    _   <- Time.render[Matrix, IO](model, _.data("running") == false) { s =>
+      val updateState: IO[Matrix] =
+        for {
+          iter  <- IO { s.data("iter").asInstanceOf[Int] } 
+          sNext <- IO { s.copy(
+            log = s"Frame $iter" :: s.log
+          , data = s.data.updated("iter", iter + 1)) }
+        } yield sNext
+
+      def checkTermination(m: Matrix): IO[Matrix] =
+        for {
+          mChar <- if (System.in.available > 0) IO { Some(System.in.read()) }
+                   else IO.pure(None)
+        } yield if (mChar.isDefined) m.copy(data = m.data.updated("running", false))
+                else m
+      
+      updateState >>= checkTermination
     }
+    _   <- consoleUninstall
+  } yield ExitCode.Success
+}
 
-    val consoleUninstall = IO {
-      AnsiConsole.systemUninstall()
-    }
+trait ConsoleUtils {
+  val height = 30
 
-    val height = 30
-    
-    val output = ansi()
-      .eraseScreen()
-      .box(2, 4 , height, 75)
-      .box(2, 80, height, 40)
-      .cursor(10, 10).a("Hello World!")
-      .cursor(100, 0)
-
-    for {
-      _   <- consoleInstall
-      _   <- output.flush
-      inp <- IO { System.in.read() }
-      _   <- consoleUninstall
-    } yield ExitCode.Success
+  val consoleInstall = IO {
+    import sys.process._
+    (Seq("sh", "-c", "stty -icanon min 1 < /dev/tty") !)
+    (Seq("sh", "-c", "stty -echo < /dev/tty") !)
+    AnsiConsole.systemInstall()
   }
 
-  implicit class RichAnsi(a: Ansi) {
-    def box(r: Int, c: Int, h: Int, w: Int): Ansi = {
-      val topWall      = "┌" + "─" * (w - 2) + "┐"
-      val bottomWall   = "└" + "─" * (w - 2) + "┘"
-      val intermediary = "│" + " " * (w - 2) + "│"
-
-      (1 to h - 2).foldLeft(
-        a .cursor(r        , c).render(topWall     )) { (an, i) =>
-        an.cursor(r + i    , c).render(intermediary) }
-          .cursor(r + h - 1, c).render(bottomWall  )
-    }
-
-    def flush: IO[Unit] = IO { println(a) }
+  val consoleUninstall = IO {
+    AnsiConsole.systemUninstall()
   }
-
 }
